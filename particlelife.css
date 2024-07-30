@@ -1,0 +1,12 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background: radial-gradient(circle, #333 0%, #000 100%);
+}
+
+canvas {
+    border: 1px solid white;
+}

@@ -1,53 +1,58 @@
 // define necessary variables here
-ctx = document.getElementById("canvas").getContext('2d')
-width = document.getElementById("canvas").width
-height = document.getElementById("canvas").height
-twoPI = Math.PI * 2
-particles = []
+var ctx = document.getElementById("canvas").getContext('2d')
+var width = document.getElementById("canvas").width
+var height = document.getElementById("canvas").height
+var twoPI = Math.PI * 2
+var radius = 5
+var num_colors = 3
+var particles = []
 
-drawBG = (x, y, color) => {
+// I'm most familiar with the ES6 class syntax, so I want to use this
+class Particle {
+
+    constructor(x, y, color) {
+        this.x = x
+        this.y = y
+        this.color = color
+    }
+
+    draw() {
+        ctx.beginPath()
+        ctx.arc(this.x, this.y, 5, 0, twoPI)
+        ctx.fillStyle = `hsl(${360 * (this.color / num_colors)}, 100%, 50%)`
+        ctx.fill()
+        ctx.stroke()
+    }
+    getX() { return this.x }
+    getY() { return this.y }
+}
+
+const random = (max) => {
+    return Math.random() * max
+}
+
+// create force matrix here, awkward spot but I needed it to be after
+// the random function
+var forces = Array.from({length : num_colors}, () => Array.from({length : num_colors}, () => random(2) - 1))
+
+const drawBG = (x, y, color) => {
     ctx.fillStyle = color
     ctx.fillRect(x, y, width, height)
 }
 
-drawCircle = (x, y, color, radius) => {
-    ctx.beginPath()
-    ctx.arc(x, y, radius, 0, twoPI)
-    ctx.fillStyle = color
-    ctx.fill()
-    ctx.stroke()
-}
-
-particle = (x, y, color) => {
-    return { "x" : x, "y" : y, "vx" : 0, "vy" : 0, "color" : color }
-}
-
-random = (max) => {
-    console.log(max)
-    return Math.random() * max
-}
-
-create = (amt, color) => {
-    group = []
+const create = (amt) => {
     for (let i = 0; i < amt; i++) {
-        p = particle(random(width), random(height), color)
-        group.push(p)
+        let p = new Particle(random(width), random(height), Math.floor(random(num_colors)))
         particles.push(p)
     }
-    return group
 }
 
-update = () => {
+const update = () => {
     ctx.clearRect(0, 0, width, height)
     drawBG(0, 0, "black")
-    for (let i = 0; i < particles.length; i++) {
-        drawCircle (particles[i].x,
-                    particles[i].y,
-                    particles[i].color,
-                    5)
-    }
+    particles.forEach(particle => particle.draw())
     requestAnimationFrame(update)
 }
 
-create(10, "yellow")
+create(10)
 update()
