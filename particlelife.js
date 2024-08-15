@@ -29,23 +29,60 @@ class Particle {
         this.color = Math.floor(random(num_colors))
     }
 
-    getX() { return this.x % 1 }
-    getY() { return this.y % 1 }
+    getX() { 
+        if ( this.x >= 0 ) return this.x % 1
+        
+        let scale = Math.ceil(this.x / -1)
+        
+        return this.x + scale
+    }
+    getY() { 
+        if ( this.y >= 0 ) return this.y % 1
+
+        let scale = Math.ceil(this.y / -1)
+
+        return this.y + scale
+
+    }
 
     draw() {
         ctx.beginPath()
-        ctx.arc(this.x * width, this.y * height, 2, 0, twoPI)
+        ctx.arc(this.getX() * width, this.getY() * height, 2, 0, twoPI)
         ctx.fillStyle = `hsl(${360 * (this.color / num_colors)}, 100%, 50%)`
         ctx.fill()
         ctx.stroke()
     }
+
+    drawR() {
+        ctx.beginPath()
+        ctx.ellipse(this.getX() * width, this.getY() * height, rMax * width, rMax * height, 0, 0, twoPI)
+        ctx.strokeStyle = "blue"
+        ctx.stroke()
+    }
 }
 
-class Triangle {
+class ParticlePair {
     constructor(x, y) {
         this.x = x
         this.y = y
         this.r = Math.hypot(this.x, this.y)
+    }
+}
+
+const drawSq = (x, y, width, height) => {
+    ctx.strokeStyle = "white"
+    ctx.lineWidth = 2
+    ctx.strokeRect(x, y, width, height)
+}
+
+const drawPartition = () => {
+    let stepX = rMax * width
+    let stepY = rMax * height
+
+    for (let x = 0; x < width; x += stepX) {
+        for (let y = 0; y < width; y += stepY) {
+            drawSq(x, y, stepX, stepY)
+        }
     }
 }
 
@@ -74,9 +111,9 @@ const force = (r, force) => {
 }
 
 const distance = (particleA, particleB) => {
-    let dx = particleA.x - particleB.x
-    let dy = particleA.y - particleB.y
-    return new Triangle(dx, dy)
+    let dx = particleA.getX() - particleB.getX()
+    let dy = particleA.getY() - particleB.getY()
+    return new ParticlePair(dx, dy)
 }
 
 const update = () => {
@@ -125,7 +162,10 @@ const update = () => {
     requestAnimationFrame(update)
 }
 
-console.log(forces)
-
-create(1000)
-update()
+ctx.clearRect(0, 0, width, height)
+drawBG(0, 0, "black")
+drawPartition()
+create(1)
+particles[0].draw()
+particles[0].drawR()
+//update()
